@@ -84,7 +84,8 @@ const state = {
   archives: JSON.parse(localStorage.getItem("iaArchives") || "[]"),
   activity: JSON.parse(localStorage.getItem("activityLog") || "[]"),
   archiveFilter: "all",
-  scenarioLab: []
+  scenarioLab: [],
+  generatedActionPlan: ""
 };
 
 
@@ -233,6 +234,132 @@ function renderScenarioLab() {
     </div>
   `;
 }
+
+
+function buildWavePlan() {
+  const source = state.currentMoves.length ? state.currentMoves : state.report?.moves || [];
+  if (!source.length) {
+    el("wavePlanOutput").innerHTML = "<p>Aucun déplacement disponible. Lancez une analyse IA.</p>";
+    return;
+  }
+
+  const thresholdMap = { Critique: 80, Haute: 60, Moyenne: 35, all: 0 };
+  const filter = el("wavePriorityFilter").value;
+  const batchSize = Math.max(2, Math.min(25, Number(el("waveBatchSize").value) || 6));
+  const minScore = thresholdMap[filter] ?? 0;
+  const selected = source
+    .filter((m) => m.score >= minScore)
+    .sort((a, b) => b.score - a.score || b.confidence - a.confidence);
+
+  if (!selected.length) {
+    el("wavePlanOutput").innerHTML = "<p>Aucun déplacement ne correspond au filtre choisi.</p>";
+    return;
+  }
+
+  const waves = [];
+  for (let i = 0; i < selected.length; i += batchSize) waves.push(selected.slice(i, i + batchSize));
+
+  el("wavePlanOutput").innerHTML = waves
+    .map((wave, i) => {
+      const avgScore = Math.round(wave.reduce((sum, m) => sum + m.score, 0) / wave.length);
+      const critical = wave.filter((m) => m.priority === "Critique").length;
+      const skus = wave.map((m) => maskSku(m.sku)).join(", ");
+      return `<div class="archive-item"><h4>Vague ${i + 1} · ${wave.length} mouvements</h4><p>Score moyen: ${avgScore} | Critiques: ${critical}</p><p>${skus}</p></div>`;
+    })
+    .join("");
+}
+
+function runZoneSimulation() {
+  const source = state.currentMoves.length ? state.currentMoves : state.report?.moves || [];
+  if (!source.length) {
+    el("zoneSimulationOutput").innerHTML = "<p>Aucun déplacement disponible pour simuler les zones.</p>";
+    return;
+  }
+
+  const demandShift = Number(el("zoneDemandShift").value) || 0;
+  const reserveBoost = Number(el("zoneReserveBoost").value) || 0;
+  el("zoneSimulationMeta").textContent = `Variation demande: ${demandShift}% | Réserve capacité: ${reserveBoost}%`;
+
+  const zones = ["L2", "L3", "L5"].map((zone) => {
+    const items = source.filter((m) => m.toZone === zone);
+    const baseLoad = items.length ? Math.round(items.reduce((sum, m) => sum + m.capacityPressure, 0) / items.length) : 0;
+    const projected = Math.max(0, Math.min(160, Math.round(baseLoad * (1 + demandShift / 100) - reserveBoost)));
+    const status = projected >= 100 ? "Critique" : projected >= 80 ? "Sous tension" : "Stable";
+    return { zone, projected, status, count: items.length };
+  });
+
+  el("zoneSimulationOutput").innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Zone</th><th>Mouvements</th><th>Charge projetée</th><th>Statut</th></tr></thead>
+        <tbody>${zones.map((z) => `<tr><td>${z.zone}</td><td>${z.count}</td><td>${z.projected}%</td><td>${z.status}</td></tr>`).join("")}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function runDataQualityCheck() {
+  if (!validateDatasetReadiness()) return;
+  const inventory = normalizeRows(state.datasets.inventory);
+  const sales = normalizeRows(state.datasets.sales);
+  const incoming = normalizeRows(state.datasets.incoming);
+  const locations = normalizeRows(state.datasets.locations);
+
+  const invSku = new Set(inventory.map((i) => i.sku));
+  const locSet = new Set(locations.map((l) => l.location));
+
+  const missingLocation = inventory.filter((i) => !i.location || !locSet.has(i.location));
+  const zeroQty = inventory.filter((i) => i.qty <= 0);
+  const unknownSales = sales.filter((s) => !invSku.has(s.sku));
+  const unknownIncoming = incoming.filter((i) => !invSku.has(i.sku));
+
+  const score = Math.max(0, 100 - (missingLocation.length * 8 + zeroQty.length * 5 + unknownSales.length * 4 + unknownIncoming.length * 4));
+
+  el("dataQualityOutput").innerHTML = `
+    <p><span class="chip">Score qualité: ${score}%</span></p>
+    <ul>
+      <li>Inventaire sans location valide: ${missingLocation.length}</li>
+      <li>Inventaire qty nulle/invalide: ${zeroQty.length}</li>
+      <li>Ventes sans SKU inventaire: ${unknownSales.length}</li>
+      <li>Arrivages sans SKU inventaire: ${unknownIncoming.length}</li>
+    </ul>
+  `;
+}
+
+function generateActionPlan() {
+  const source = state.currentMoves.length ? state.currentMoves : state.report?.moves || [];
+  if (!source.length) {
+    el("actionPlanOutput").innerHTML = "<p>Aucune recommandation active pour générer un plan.</p>";
+    return;
+  }
+
+  const detail = el("actionPlanDetail").value;
+  const top = source
+    .slice()
+    .sort((a, b) => b.score - a.score || (a.toZone || "").localeCompare(b.toZone || ""))
+    .slice(0, 14);
+
+  const days = Array.from({ length: 7 }, (_, i) => ({ day: i + 1, moves: [] }));
+  top.forEach((move, idx) => days[idx % 7].moves.push(move));
+
+  const lines = days.map((d) => {
+    if (!d.moves.length) return `Jour ${d.day}: surveillance standard`;
+    const base = `Jour ${d.day}: ${d.moves.length} actions`;
+    if (detail === "compact") return `${base} (${d.moves.map((m) => maskSku(m.sku)).join(", ")})`;
+    if (detail === "full") {
+      const detailLines = d.moves
+        .map((m) => `${maskSku(m.sku)}: ${m.from} → ${m.targetType}/${m.toZone} [${m.priority}, score ${m.score}]`)
+        .join("\n- ");
+      return `${base}\n- ${detailLines}`;
+    }
+    return `${base} · priorités: ${d.moves.map((m) => m.priority).join(", ")}`;
+  });
+
+  const planText = lines.join("\n\n");
+  state.generatedActionPlan = planText;
+  el("actionPlanOutput").innerHTML = `<pre>${planText}</pre>`;
+}
+
 
 function aiPriority(score) {
   if (score >= 80) return "Critique";
@@ -736,6 +863,34 @@ function bindEvents() {
     logActivity(`Application scénario ${best.label}`);
   });
 
+  el("buildWavePlanBtn").addEventListener("click", () => {
+    buildWavePlan();
+    logActivity("Construction du plan de vagues");
+  });
+  el("runZoneSimulationBtn").addEventListener("click", () => {
+    runZoneSimulation();
+    logActivity("Simulation de charge zones");
+  });
+  ["zoneDemandShift", "zoneReserveBoost"].forEach((id) =>
+    el(id).addEventListener("input", () => {
+      el("zoneSimulationMeta").textContent = `Variation demande: ${el("zoneDemandShift").value}% | Réserve capacité: ${el("zoneReserveBoost").value}%`;
+    })
+  );
+  el("runDataQualityBtn").addEventListener("click", () => {
+    runDataQualityCheck();
+    logActivity("Contrôle qualité des données");
+  });
+  el("generateActionPlanBtn").addEventListener("click", () => {
+    generateActionPlan();
+    logActivity("Génération plan d'action 7 jours");
+  });
+  el("exportActionPlanBtn").addEventListener("click", () => {
+    if (!state.generatedActionPlan) generateActionPlan();
+    if (!state.generatedActionPlan) return;
+    downloadBlob(state.generatedActionPlan, `plan-action-${Date.now()}.txt`, "text/plain;charset=utf-8;");
+    toast("Plan d'action exporté");
+  });
+
   ["searchSkuInput", "zoneFilterSelect", "priorityFilterSelect", "sortMovesSelect"].forEach((id) =>
     el(id).addEventListener(id.includes("input") ? "input" : "change", () => renderReport(state.report))
   );
@@ -754,6 +909,7 @@ function bindEvents() {
     el("simValues").textContent = `Ventes x${el("salesMultiplier").value} | Arrivages x${el("incomingMultiplier").value} | Capacité x${el("capacityBias").value}`;
   }));
   el("simValues").textContent = `Ventes x1 | Arrivages x1 | Capacité x1`;
+  el("zoneSimulationMeta").textContent = `Variation demande: 0% | Réserve capacité: 10%`;
 
   el("exportCsvBtn").addEventListener("click", () => exportCsv());
   el("exportJsonBtn").addEventListener("click", () => exportJson());

@@ -161,6 +161,90 @@
               <div id="movementOutput" class="output"></div>
             </div>
           </article>
+
+          <div class="grid-2">
+            <article class="card dropdown-panel">
+              <button class="panel-toggle" type="button"><span>Bloc majeur 2 · Priorisation intelligente des vagues</span><span class="panel-icon">▾</span></button>
+              <div class="panel-content">
+                <h2>Priorisation intelligente des vagues</h2>
+                <p class="muted">Découpez les déplacements en vagues opérationnelles selon la capacité équipe et le niveau d'urgence.</p>
+                <div class="field-grid">
+                  <label>Taille maximale par vague
+                    <input id="waveBatchSize" type="number" min="2" max="25" step="1" value="6" />
+                  </label>
+                  <label>Inclure seulement priorités
+                    <select id="wavePriorityFilter">
+                      <option value="all">Toutes</option>
+                      <option value="Critique">Critique</option>
+                      <option value="Haute">Haute +</option>
+                      <option value="Moyenne">Moyenne +</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="actions">
+                  <button id="buildWavePlanBtn">Construire les vagues</button>
+                </div>
+                <div id="wavePlanOutput" class="output"></div>
+              </div>
+            </article>
+
+            <article class="card dropdown-panel">
+              <button class="panel-toggle" type="button"><span>Bloc majeur 3 · Simulateur charge zones</span><span class="panel-icon">▾</span></button>
+              <div class="panel-content">
+                <h2>Simulateur charge zones</h2>
+                <p class="muted">Projetez l'impact d'une variation de demande sur chaque zone avant exécution terrain.</p>
+                <div class="field-grid">
+                  <label>Variation de demande (%)
+                    <input id="zoneDemandShift" type="range" min="-30" max="60" step="5" value="0" />
+                  </label>
+                  <label>Capacité de réserve (%)
+                    <input id="zoneReserveBoost" type="range" min="0" max="40" step="5" value="10" />
+                  </label>
+                </div>
+                <p id="zoneSimulationMeta" class="muted"></p>
+                <div class="actions">
+                  <button id="runZoneSimulationBtn">Simuler la charge</button>
+                </div>
+                <div id="zoneSimulationOutput" class="output"></div>
+              </div>
+            </article>
+          </div>
+
+          <div class="grid-2">
+            <article class="card dropdown-panel">
+              <button class="panel-toggle" type="button"><span>Bloc majeur 4 · Contrôle qualité données</span><span class="panel-icon">▾</span></button>
+              <div class="panel-content">
+                <h2>Contrôle qualité des données source</h2>
+                <p class="muted">Détectez les écarts qui dégradent la confiance des recommandations IA.</p>
+                <div class="actions">
+                  <button id="runDataQualityBtn">Lancer le contrôle</button>
+                </div>
+                <div id="dataQualityOutput" class="output"></div>
+              </div>
+            </article>
+
+            <article class="card dropdown-panel">
+              <button class="panel-toggle" type="button"><span>Bloc majeur 5 · Plan d'action 7 jours</span><span class="panel-icon">▾</span></button>
+              <div class="panel-content">
+                <h2>Plan d'action 7 jours</h2>
+                <p class="muted">Générez un plan hebdomadaire prêt à partager avec les équipes d'exécution.</p>
+                <div class="field-grid">
+                  <label>Niveau de détail
+                    <select id="actionPlanDetail">
+                      <option value="compact">Compact</option>
+                      <option value="standard" selected>Standard</option>
+                      <option value="full">Complet</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="actions">
+                  <button id="generateActionPlanBtn">Générer le plan</button>
+                  <button id="exportActionPlanBtn" class="outline-btn">Exporter .txt</button>
+                </div>
+                <div id="actionPlanOutput" class="output"></div>
+              </div>
+            </article>
+          </div>
         </section>
 
         <section id="pilotage" class="tab-panel">
