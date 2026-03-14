@@ -1,0 +1,124 @@
+:root {
+  --bg: #eaf2ff;
+  --card: #ffffff;
+  --primary: #1f5eff;
+  --secondary: #00a3b4;
+  --text: #19304f;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  color: var(--text);
+  background: linear-gradient(130deg, #f4f8ff 20%, #d8e7ff 100%);
+}
+
+.app-shell {
+  max-width: 1150px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+h1 { margin: 0; }
+.subtitle { margin: 4px 0 0; opacity: 0.8; }
+
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 8px 20px rgba(26, 58, 112, 0.1);
+  margin-top: 16px;
+}
+
+.gate input, button, textarea {
+  border-radius: 10px;
+  border: 1px solid #c8d6f3;
+  padding: 10px;
+  font-size: 0.95rem;
+}
+
+button {
+  background: linear-gradient(120deg, var(--primary), var(--secondary));
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.row, .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.hidden { display: none; }
+
+.tabs {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.tab {
+  background: #dbe8ff;
+  color: #20406d;
+  border: 1px solid #c6d8fb;
+}
+.tab.active {
+  background: var(--primary);
+  color: white;
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.upload-list {
+  display: grid;
+  gap: 8px;
+}
+
+.output {
+  margin-top: 10px;
+  background: #f5f9ff;
+  border: 1px solid #d4e1ff;
+  border-radius: 12px;
+  padding: 12px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.archive-item {
+  border: 1px solid #d7e2ff;
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: #f8fbff;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #e4efff;
+  font-size: 0.82rem;
+  margin-right: 5px;
+}
+
+@media (max-width: 800px) {
+  .grid-2 { grid-template-columns: 1fr; }
+}

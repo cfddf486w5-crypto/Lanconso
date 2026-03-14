@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Consolidation Langelier</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+  </head>
+  <body>
+    <div id="app" class="app-shell">
+      <header class="topbar">
+        <div>
+          <h1>Consolidation Langelier</h1>
+          <p class="subtitle">Optimisation entrepôt • PC & iPhone</p>
+        </div>
+        <div class="invite-status" id="inviteStatus">Accès protégé par invitation</div>
+      </header>
+
+      <section id="inviteGate" class="card gate">
+        <h2>Connexion par invitation</h2>
+        <p>Entrez votre courriel et code d'invitation pour accéder aux données d'entreprise.</p>
+        <div class="row">
+          <input id="emailInput" type="email" placeholder="courriel@entreprise.com" />
+          <input id="codeInput" type="password" placeholder="Code d'invitation" />
+          <button id="loginBtn">Accéder</button>
+        </div>
+        <small>Démo locale: utilisez <b>admin@langelier.ca</b> et <b>LANGELIER-2026</b>.</small>
+      </section>
+
+      <main id="mainContent" class="hidden">
+        <nav class="tabs">
+          <button class="tab active" data-tab="consolidation">Consolidations</button>
+          <button class="tab" data-tab="settings">Paramètres</button>
+          <button class="tab" data-tab="archives">Archives IA</button>
+        </nav>
+
+        <section id="consolidation" class="tab-panel active">
+          <div class="grid-2">
+            <article class="card">
+              <h2>Imports Excel (.xlsx)</h2>
+              <div class="upload-list">
+                <label>Inventaire <input id="inventoryFile" type="file" accept=".xlsx,.xls" /></label>
+                <label>Ventes <input id="salesFile" type="file" accept=".xlsx,.xls" /></label>
+                <label>Marchandises attendues <input id="incomingFile" type="file" accept=".xlsx,.xls" /></label>
+                <label>Locations & types <input id="locationsFile" type="file" accept=".xlsx,.xls" /></label>
+              </div>
+              <button id="runAnalysisBtn">Lancer l'analyse IA</button>
+            </article>
+
+            <article class="card">
+              <h2>Règles métier intégrées</h2>
+              <ul id="rulesPreview"></ul>
+            </article>
+          </div>
+
+          <article class="card">
+            <h2>Génération de déplacement</h2>
+            <div class="actions">
+              <button id="generateMovesBtn">Générer les déplacements</button>
+              <button id="printReportBtn">Imprimer le rapport actif</button>
+              <button id="archiveReportBtn">Archiver le rapport</button>
+            </div>
+            <div id="analysisOutput" class="output"></div>
+          </article>
+
+          <article class="card">
+            <h2>Onglet déplacement</h2>
+            <div id="movementOutput" class="output"></div>
+          </article>
+        </section>
+
+        <section id="settings" class="tab-panel">
+          <article class="card">
+            <h2>Paramètres IA</h2>
+            <p>Ajoutez ou modifiez des règles; elles sont gravées dans la mémoire locale IA de l'application.</p>
+            <textarea id="customRules" rows="8"></textarea>
+            <div class="actions">
+              <button id="saveRulesBtn">Enregistrer les règles</button>
+              <button id="resetRulesBtn">Réinitialiser</button>
+            </div>
+          </article>
+
+          <article class="card">
+            <h2>Zonage stratégique</h2>
+            <ul>
+              <li><b>L2</b>: zone critique (meilleurs vendeurs)</li>
+              <li><b>L3</b>: zone de pige régulière</li>
+              <li><b>L5</b>: zone éloignée (moins vendeurs)</li>
+              <li><b>L2H/L2J</b>: zones magasin distinctes</li>
+            </ul>
+          </article>
+        </section>
+
+        <section id="archives" class="tab-panel">
+          <article class="card">
+            <h2>Rapports IA archivés</h2>
+            <div id="archiveList" class="archive-list"></div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
