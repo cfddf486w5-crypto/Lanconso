@@ -83,8 +83,18 @@ const state = {
   currentMoves: [],
   archives: JSON.parse(localStorage.getItem("iaArchives") || "[]"),
   activity: JSON.parse(localStorage.getItem("activityLog") || "[]"),
-  archiveFilter: "all"
+  archiveFilter: "all",
+  scenarioLab: []
 };
+
+
+const scenarioProfiles = [
+  { id: "base", label: "Base opérationnelle", sales: 1, incoming: 1, capacity: 1, volatility: 1 },
+  { id: "peak", label: "Pic de ventes", sales: 1.65, incoming: 1.1, capacity: 0.95, volatility: 1.3 },
+  { id: "supply", label: "Surplus arrivages", sales: 0.95, incoming: 1.9, capacity: 1.05, volatility: 1.2 },
+  { id: "resilience", label: "Plan résilience", sales: 1.25, incoming: 1.2, capacity: 1.35, volatility: 0.85 }
+];
+
 
 const el = (id) => document.getElementById(id);
 const persist = (k, v) => localStorage.setItem(k, JSON.stringify(v));
@@ -159,6 +169,69 @@ function validateDatasetReadiness() {
     return false;
   }
   return true;
+}
+
+function withScenarioMultipliers(profile) {
+  const moves = (state.report?.moves || []).map((move) => {
+    const score = Math.min(100, Math.max(0, Math.round(move.score * profile.sales * 0.7 + move.capacityPressure * profile.incoming * 0.2 + 8 * profile.volatility)));
+    const confidence = Math.max(45, Math.min(99, Math.round(move.confidence * profile.capacity - profile.volatility * 4)));
+    const capacityPressure = Math.min(100, Math.round(move.capacityPressure * profile.incoming * (2 - profile.capacity)));
+    const velocityScore = Math.min(100, Math.round(move.velocityScore * profile.sales));
+    return {
+      ...move,
+      score,
+      confidence,
+      capacityPressure,
+      velocityScore,
+      priority: aiPriority(score),
+      reason: `${move.reason} | Scénario ${profile.label}`
+    };
+  });
+
+  const riskMoves = moves.filter((m) => m.score >= 65);
+  const avgConfidence = moves.length ? Math.round(moves.reduce((sum, m) => sum + m.confidence, 0) / moves.length) : 0;
+  const riskIndex = moves.length ? Math.round((riskMoves.length / moves.length) * 100) : 0;
+  const saturation = Math.min(100, Math.round(moves.reduce((sum, m) => sum + m.capacityPressure, 0) / Math.max(1, moves.length)));
+  const teamLoad = Math.min(100, Math.round((riskIndex * 0.45) + (saturation * 0.4) + (100 - avgConfidence) * 0.15));
+  const priorityMix = ["Critique", "Haute", "Moyenne", "Standard"].map((level) => `${level}:${moves.filter((m) => m.priority === level).length}`).join(" · ");
+
+  return {
+    ...profile,
+    totalMoves: moves.length,
+    riskMoves: riskMoves.length,
+    riskIndex,
+    saturation,
+    avgConfidence,
+    teamLoad,
+    priorityMix,
+    moves
+  };
+}
+
+function renderScenarioLab() {
+  const output = el("scenarioLabOutput");
+  const summary = el("scenarioLabSummary");
+  if (!state.report || !state.report.moves?.length) {
+    output.innerHTML = "<p>Exécutez d'abord une analyse IA pour alimenter le laboratoire.</p>";
+    summary.textContent = "Aucun scénario disponible pour le moment.";
+    return;
+  }
+
+  const scenarios = scenarioProfiles.map(withScenarioMultipliers).sort((a, b) => (a.riskIndex - b.riskIndex) || (b.avgConfidence - a.avgConfidence));
+  state.scenarioLab = scenarios;
+  const best = scenarios[0];
+
+  summary.innerHTML = `<span class="chip">Meilleur scénario: ${best.label}</span> <span class="chip">Risque ${best.riskIndex}%</span> <span class="chip">Confiance ${best.avgConfidence}%</span>`;
+  output.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Scénario</th><th>Risque</th><th>Saturation</th><th>Charge équipe</th><th>Confiance</th><th>Mix priorités</th></tr></thead>
+        <tbody>
+          ${scenarios.map((s) => `<tr><td>${s.label}</td><td>${s.riskIndex}% (${s.riskMoves}/${s.totalMoves})</td><td>${s.saturation}%</td><td>${s.teamLoad}%</td><td>${s.avgConfidence}%</td><td>${s.priorityMix}</td></tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
 }
 
 function aiPriority(score) {
@@ -614,6 +687,7 @@ function bindEvents() {
   el("runAnalysisBtn").addEventListener("click", () => {
     state.report = analyze();
     renderReport(state.report);
+    renderScenarioLab();
     logActivity("Analyse IA exécutée");
   });
 
@@ -636,6 +710,30 @@ function bindEvents() {
     refreshDatasetStatus();
     toast("Scénario stress activé");
     logActivity("Activation scénario stress");
+  });
+
+
+  el("runScenarioLabBtn").addEventListener("click", () => {
+    if (!state.report) {
+      state.report = analyze();
+      renderReport(state.report);
+    }
+    renderScenarioLab();
+    toast("Laboratoire de scénarios exécuté");
+    logActivity("Exécution laboratoire de scénarios");
+  });
+
+  el("applyBestScenarioBtn").addEventListener("click", () => {
+    if (!state.scenarioLab.length) renderScenarioLab();
+    const best = state.scenarioLab[0];
+    if (!best) return alert("Aucun scénario à appliquer");
+    state.currentMoves = applyFilters(best.moves);
+    renderHeatmap(state.currentMoves);
+    renderZoneSummary(state.currentMoves);
+    renderPilotage(buildPilotageSnapshot(state.currentMoves));
+    el("movementOutput").innerHTML = "<ol>" + state.currentMoves.map((m) => `<li>${maskSku(m.sku)}: ${m.from} → ${m.targetType}/${m.toZone} (${m.priority}, impact ${m.score})</li>`).join("") + "</ol>";
+    toast(`Profil appliqué: ${best.label}`);
+    logActivity(`Application scénario ${best.label}`);
   });
 
   ["searchSkuInput", "zoneFilterSelect", "priorityFilterSelect", "sortMovesSelect"].forEach((id) =>
@@ -773,3 +871,4 @@ setupSession();
 refreshDatasetStatus();
 renderStats(null);
 renderDiagnostics(null);
+renderScenarioLab();
