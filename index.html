@@ -14,7 +14,11 @@
           <h1>Consolidation Langelier</h1>
           <p class="subtitle">Optimisation entrepôt • PC & iPhone</p>
         </div>
-        <div class="invite-status" id="inviteStatus">Accès protégé par invitation</div>
+        <div class="header-actions">
+          <div class="invite-status" id="inviteStatus">Accès protégé par invitation</div>
+          <button id="themeToggleBtn" class="outline-btn">Mode sombre</button>
+          <button id="logoutBtn" class="danger-btn hidden">Déconnexion</button>
+        </div>
       </header>
 
       <section id="inviteGate" class="card gate">
@@ -36,6 +40,16 @@
         </nav>
 
         <section id="consolidation" class="tab-panel active">
+          <article class="card">
+            <h2>Tableau de bord</h2>
+            <div class="stats-grid">
+              <div class="stat-card"><span>SKU analysés</span><b id="statSku">0</b></div>
+              <div class="stat-card"><span>Déplacements</span><b id="statMoves">0</b></div>
+              <div class="stat-card"><span>Urgences capacité</span><b id="statCritical">0</b></div>
+              <div class="stat-card"><span>Dernière analyse</span><b id="statLastRun">-</b></div>
+            </div>
+          </article>
+
           <div class="grid-2">
             <article class="card">
               <h2>Imports Excel (.xlsx)</h2>
@@ -45,7 +59,11 @@
                 <label>Marchandises attendues <input id="incomingFile" type="file" accept=".xlsx,.xls" /></label>
                 <label>Locations & types <input id="locationsFile" type="file" accept=".xlsx,.xls" /></label>
               </div>
-              <button id="runAnalysisBtn">Lancer l'analyse IA</button>
+              <div class="actions">
+                <button id="runAnalysisBtn">Lancer l'analyse IA</button>
+                <button id="loadDemoBtn" class="outline-btn">Charger données démo</button>
+              </div>
+              <p id="datasetStatus" class="muted"></p>
             </article>
 
             <article class="card">
@@ -55,11 +73,26 @@
           </div>
 
           <article class="card">
-            <h2>Génération de déplacement</h2>
+            <h2>Pilote des déplacements</h2>
             <div class="actions">
               <button id="generateMovesBtn">Générer les déplacements</button>
+              <button id="exportCsvBtn" class="outline-btn">Exporter CSV</button>
               <button id="printReportBtn">Imprimer le rapport actif</button>
               <button id="archiveReportBtn">Archiver le rapport</button>
+            </div>
+            <div class="filters-row">
+              <input id="searchSkuInput" placeholder="Rechercher SKU..." />
+              <select id="zoneFilterSelect">
+                <option value="all">Toutes les zones</option>
+                <option value="L2">L2 (critique)</option>
+                <option value="L3">L3 (régulière)</option>
+                <option value="L5">L5 (éloignée)</option>
+              </select>
+              <select id="sortMovesSelect">
+                <option value="priority">Tri: priorité IA</option>
+                <option value="sku">Tri: SKU A→Z</option>
+                <option value="zone">Tri: zone</option>
+              </select>
             </div>
             <div id="analysisOutput" class="output"></div>
           </article>
@@ -94,7 +127,10 @@
 
         <section id="archives" class="tab-panel">
           <article class="card">
-            <h2>Rapports IA archivés</h2>
+            <div class="space-between">
+              <h2>Rapports IA archivés</h2>
+              <button id="clearArchivesBtn" class="danger-btn">Vider les archives</button>
+            </div>
             <div id="archiveList" class="archive-list"></div>
           </article>
         </section>
