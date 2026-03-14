@@ -3,27 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Consolidation Langelier</title>
+    <title>Consolidation Langelier Pro</title>
     <link rel="stylesheet" href="styles.css" />
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
   </head>
   <body>
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
     <div id="app" class="app-shell">
-      <header class="topbar">
+      <header class="topbar card">
         <div>
-          <h1>Consolidation Langelier</h1>
-          <p class="subtitle">Optimisation entrepôt • PC & iPhone</p>
+          <h1>Consolidation Langelier <span class="chip">PRO v2.0</span></h1>
+          <p class="subtitle">Plateforme intelligente d'optimisation entrepôt</p>
         </div>
         <div class="header-actions">
           <div class="invite-status" id="inviteStatus">Accès protégé par invitation</div>
+          <button id="commandPaletteBtn" class="outline-btn">⌘ Commandes</button>
           <button id="themeToggleBtn" class="outline-btn">Mode sombre</button>
+          <button id="densityToggleBtn" class="outline-btn">Mode compact</button>
           <button id="logoutBtn" class="danger-btn hidden">Déconnexion</button>
         </div>
       </header>
 
       <section id="inviteGate" class="card gate">
         <h2>Connexion par invitation</h2>
-        <p>Entrez votre courriel et code d'invitation pour accéder aux données d'entreprise.</p>
+        <p>Connectez-vous pour activer le cockpit IA professionnel de gestion d'entrepôt.</p>
         <div class="row">
           <input id="emailInput" type="email" placeholder="courriel@entreprise.com" />
           <input id="codeInput" type="password" placeholder="Code d'invitation" />
@@ -35,17 +38,24 @@
       <main id="mainContent" class="hidden">
         <nav class="tabs">
           <button class="tab active" data-tab="consolidation">Consolidations</button>
-          <button class="tab" data-tab="settings">Paramètres</button>
-          <button class="tab" data-tab="archives">Archives IA</button>
+          <button class="tab" data-tab="pilotage">Pilotage avancé</button>
+          <button class="tab" data-tab="settings">Paramètres IA</button>
+          <button class="tab" data-tab="archives">Archives & comparaison</button>
+          <button class="tab" data-tab="improvements">90 améliorations</button>
         </nav>
 
         <section id="consolidation" class="tab-panel active">
           <article class="card">
-            <h2>Tableau de bord</h2>
+            <div class="space-between">
+              <h2>Tableau de bord exécutif</h2>
+              <div class="chip" id="liveClock">--:--:--</div>
+            </div>
             <div class="stats-grid">
               <div class="stat-card"><span>SKU analysés</span><b id="statSku">0</b></div>
               <div class="stat-card"><span>Déplacements</span><b id="statMoves">0</b></div>
               <div class="stat-card"><span>Urgences capacité</span><b id="statCritical">0</b></div>
+              <div class="stat-card"><span>Confiance IA moyenne</span><b id="statConfidence">0%</b></div>
+              <div class="stat-card"><span>Temps d'analyse</span><b id="statDuration">0 ms</b></div>
               <div class="stat-card"><span>Dernière analyse</span><b id="statLastRun">-</b></div>
             </div>
           </article>
@@ -59,82 +69,163 @@
                 <label>Marchandises attendues <input id="incomingFile" type="file" accept=".xlsx,.xls" /></label>
                 <label>Locations & types <input id="locationsFile" type="file" accept=".xlsx,.xls" /></label>
               </div>
+              <div class="progress-wrap"><div id="datasetProgress" class="progress-bar"></div></div>
+              <p id="datasetStatus" class="muted"></p>
               <div class="actions">
                 <button id="runAnalysisBtn">Lancer l'analyse IA</button>
                 <button id="loadDemoBtn" class="outline-btn">Charger données démo</button>
+                <button id="scenarioBtn" class="outline-btn">Scénario stress</button>
               </div>
-              <p id="datasetStatus" class="muted"></p>
             </article>
 
             <article class="card">
-              <h2>Règles métier intégrées</h2>
+              <h2>Paramètres simulation IA</h2>
+              <div class="field-grid">
+                <label>Multiplicateur ventes
+                  <input id="salesMultiplier" type="range" min="0.5" max="2" step="0.1" value="1" />
+                </label>
+                <label>Multiplicateur arrivages
+                  <input id="incomingMultiplier" type="range" min="0.5" max="2" step="0.1" value="1" />
+                </label>
+                <label>Sévérité capacité
+                  <input id="capacityBias" type="range" min="0.5" max="2" step="0.1" value="1" />
+                </label>
+              </div>
+              <p id="simValues" class="muted"></p>
+              <h3>Règles métier actives</h3>
               <ul id="rulesPreview"></ul>
             </article>
           </div>
 
           <article class="card">
             <h2>Pilote des déplacements</h2>
-            <div class="actions">
+            <div class="actions wrap">
               <button id="generateMovesBtn">Générer les déplacements</button>
               <button id="exportCsvBtn" class="outline-btn">Exporter CSV</button>
-              <button id="printReportBtn">Imprimer le rapport actif</button>
-              <button id="archiveReportBtn">Archiver le rapport</button>
+              <button id="exportJsonBtn" class="outline-btn">Exporter JSON</button>
+              <button id="printReportBtn">Imprimer</button>
+              <button id="archiveReportBtn">Archiver</button>
             </div>
             <div class="filters-row">
               <input id="searchSkuInput" placeholder="Rechercher SKU..." />
               <select id="zoneFilterSelect">
                 <option value="all">Toutes les zones</option>
-                <option value="L2">L2 (critique)</option>
-                <option value="L3">L3 (régulière)</option>
-                <option value="L5">L5 (éloignée)</option>
+                <option value="L2">L2</option>
+                <option value="L3">L3</option>
+                <option value="L5">L5</option>
+              </select>
+              <select id="priorityFilterSelect">
+                <option value="all">Toutes priorités</option>
+                <option value="Critique">Critique</option>
+                <option value="Haute">Haute</option>
+                <option value="Moyenne">Moyenne</option>
+                <option value="Standard">Standard</option>
               </select>
               <select id="sortMovesSelect">
                 <option value="priority">Tri: priorité IA</option>
                 <option value="sku">Tri: SKU A→Z</option>
                 <option value="zone">Tri: zone</option>
+                <option value="score">Tri: score impact</option>
               </select>
             </div>
             <div id="analysisOutput" class="output"></div>
-          </article>
-
-          <article class="card">
-            <h2>Onglet déplacement</h2>
             <div id="movementOutput" class="output"></div>
+          </article>
+        </section>
+
+        <section id="pilotage" class="tab-panel">
+          <article class="card">
+            <h2>Centre opérationnel IA</h2>
+            <div id="riskHeatmap" class="heatmap"></div>
+            <div id="zoneSummary" class="stats-grid"></div>
+          </article>
+          <article class="card">
+            <h2>Journal d'activité applicatif</h2>
+            <div id="activityLog" class="output"></div>
+          </article>
+          <article class="card">
+            <h2>Diagnostic système</h2>
+            <div id="diagnosticsOutput" class="output"></div>
           </article>
         </section>
 
         <section id="settings" class="tab-panel">
           <article class="card">
-            <h2>Paramètres IA</h2>
-            <p>Ajoutez ou modifiez des règles; elles sont gravées dans la mémoire locale IA de l'application.</p>
+            <h2>Paramètres IA et accessibilité</h2>
             <textarea id="customRules" rows="8"></textarea>
+            <div class="field-grid">
+              <label><input type="checkbox" id="highContrastToggle" /> Contraste élevé</label>
+              <label><input type="checkbox" id="reduceMotionToggle" /> Réduire les animations</label>
+              <label><input type="checkbox" id="secureModeToggle" /> Mode sécurisé (masquer SKU)</label>
+              <label>Taille police <input id="fontScaleRange" type="range" min="90" max="125" step="5" value="100" /></label>
+            </div>
             <div class="actions">
               <button id="saveRulesBtn">Enregistrer les règles</button>
-              <button id="resetRulesBtn">Réinitialiser</button>
+              <button id="resetRulesBtn" class="outline-btn">Réinitialiser</button>
+              <button id="resetAppBtn" class="danger-btn">Réinitialiser l'application</button>
             </div>
-          </article>
-
-          <article class="card">
-            <h2>Zonage stratégique</h2>
-            <ul>
-              <li><b>L2</b>: zone critique (meilleurs vendeurs)</li>
-              <li><b>L3</b>: zone de pige régulière</li>
-              <li><b>L5</b>: zone éloignée (moins vendeurs)</li>
-              <li><b>L2H/L2J</b>: zones magasin distinctes</li>
-            </ul>
           </article>
         </section>
 
         <section id="archives" class="tab-panel">
           <article class="card">
             <div class="space-between">
-              <h2>Rapports IA archivés</h2>
-              <button id="clearArchivesBtn" class="danger-btn">Vider les archives</button>
+              <h2>Archives IA</h2>
+              <div class="actions">
+                <button id="clearArchivesBtn" class="danger-btn">Vider toutes les archives</button>
+                <button id="importBackupBtn" class="outline-btn">Importer sauvegarde</button>
+                <button id="exportBackupBtn" class="outline-btn">Exporter sauvegarde</button>
+              </div>
+            </div>
+            <div class="filters-row">
+              <input id="archiveSearchInput" placeholder="Rechercher dans les archives..." />
+              <select id="archiveFilterSelect">
+                <option value="all">Tous les rapports</option>
+                <option value="critical">Avec critiques</option>
+                <option value="light">Sans critique</option>
+              </select>
+              <select id="compareArchiveSelect"></select>
             </div>
             <div id="archiveList" class="archive-list"></div>
+            <div id="compareOutput" class="output"></div>
+          </article>
+          <input id="backupInput" type="file" accept="application/json" class="hidden" />
+        </section>
+
+        <section id="improvements" class="tab-panel">
+          <article class="card">
+            <h2>Registre des 90 améliorations majeures implantées</h2>
+            <div class="grid-3">
+              <div>
+                <h3>30 UI/UX</h3>
+                <ol id="uiImprovementsList"></ol>
+              </div>
+              <div>
+                <h3>30 IA Métier</h3>
+                <ol id="aiImprovementsList"></ol>
+              </div>
+              <div>
+                <h3>30 Application globale</h3>
+                <ol id="appImprovementsList"></ol>
+              </div>
+            </div>
           </article>
         </section>
       </main>
+    </div>
+
+    <div id="commandPalette" class="modal hidden">
+      <div class="modal-content card">
+        <h3>Commandes rapides</h3>
+        <div class="actions wrap">
+          <button data-command="analyze">Analyser</button>
+          <button data-command="demo">Données démo</button>
+          <button data-command="archive">Archiver</button>
+          <button data-command="theme">Changer thème</button>
+          <button data-command="export">Exporter CSV</button>
+        </div>
+        <button id="closePaletteBtn" class="outline-btn">Fermer</button>
+      </div>
     </div>
 
     <script src="app.js"></script>
