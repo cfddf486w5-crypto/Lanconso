@@ -418,6 +418,18 @@ function renderRules() {
   el("customRules").value = rules.join("\n");
 }
 
+
+function setupDropdownPanels() {
+  document.querySelectorAll(".dropdown-panel").forEach((panel) => {
+    panel.classList.remove("open");
+    const toggle = panel.querySelector(".panel-toggle");
+    if (!toggle) return;
+    toggle.addEventListener("click", () => {
+      panel.classList.toggle("open");
+    });
+  });
+}
+
 function setupTabs() {
   document.querySelectorAll(".tab").forEach((tab) =>
     tab.addEventListener("click", () => {
@@ -631,6 +643,7 @@ setInterval(() => {
 }, 1000);
 
 setupTabs();
+setupDropdownPanels();
 bindEvents();
 renderRules();
 renderImprovements();
