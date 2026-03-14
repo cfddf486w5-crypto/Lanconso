@@ -13,7 +13,39 @@ const defaultRules = [
 const improvements = {
   ui: Array.from({ length: 30 }, (_, i) => `UI-${i + 1} • Optimisation ergonomique professionnelle #${i + 1}`),
   ai: Array.from({ length: 30 }, (_, i) => `IA-${i + 1} • Raffinement moteur décisionnel #${i + 1}`),
-  app: Array.from({ length: 30 }, (_, i) => `APP-${i + 1} • Renforcement plateforme globale #${i + 1}`)
+  app: Array.from({ length: 30 }, (_, i) => `APP-${i + 1} • Renforcement plateforme globale #${i + 1}`),
+  pilotage: [
+    "Tour de contrôle multi-zones en temps réel",
+    "KPIs opérationnels consolidés par vague",
+    "Indice de stabilité d'entrepôt",
+    "Indice de saturation projetée",
+    "Prévision capacité sur 6 semaines",
+    "Projection charge équipes par quart",
+    "Détection proactive des incidents critiques",
+    "Moteur de priorisation incidents IA",
+    "Alertes sur seuil de risque configurable",
+    "Paramétrage horizon opérationnel",
+    "Modes d'automatisation assisté/hybride/autonome",
+    "Recommandations d'actions automatisées",
+    "Instantané exportable du pilotage",
+    "Pipeline de suivi des engagements terrain",
+    "Suivi delta entre plans et exécution",
+    "Score de confiance dynamique pilotage",
+    "Répartition de charge par zone logistique",
+    "Consolidation des urgences de capacité",
+    "Visualisation du backlog critique",
+    "Synthèse tendances journalières",
+    "Simulation de pics saisonniers",
+    "Scorage d'impact des mouvements",
+    "Matrice des dépendances inter-zones",
+    "Pilotage des files d'attente opérationnelles",
+    "Recalibrage automatique des seuils",
+    "Surveillance qualité données pilotage",
+    "Journal enrichi des décisions IA",
+    "Tableau de bord de résilience",
+    "Métriques de performance des équipes",
+    "Roadmap d'actions priorisées par valeur"
+  ]
 };
 
 const demoData = {
@@ -264,6 +296,7 @@ function renderReport(report) {
 
   renderHeatmap(state.currentMoves);
   renderZoneSummary(state.currentMoves);
+  renderPilotage(buildPilotageSnapshot(state.currentMoves));
   renderDiagnostics(report);
 }
 
@@ -289,6 +322,81 @@ function renderHeatmap(moves) {
 function renderZoneSummary(moves) {
   const zones = ["L2", "L3", "L5"].map((z) => ({ z, count: moves.filter((m) => m.toZone === z).length }));
   el("zoneSummary").innerHTML = zones.map((z) => `<div class="stat-card"><span>Zone ${z.z}</span><b>${z.count}</b></div>`).join("");
+}
+
+function buildPilotageSnapshot(moves) {
+  const horizon = Number(el("pilotageHorizon")?.value || 21);
+  const riskThreshold = Number(el("pilotageRiskThreshold")?.value || 60);
+  const automation = el("pilotageAutomationMode")?.value || "assist";
+  const riskMoves = moves.filter((m) => m.score >= riskThreshold);
+  const avgScore = moves.length ? Math.round(moves.reduce((sum, m) => sum + m.score, 0) / moves.length) : 0;
+  const avgConfidence = moves.length ? Math.round(moves.reduce((sum, m) => sum + m.confidence, 0) / moves.length) : 0;
+  const forecast = Array.from({ length: 6 }, (_, i) => {
+    const week = i + 1;
+    const load = Math.max(12, Math.min(98, Math.round(avgScore * 0.55 + riskMoves.length * 3 + week * 4 - (avgConfidence - 60) * 0.3)));
+    return { week, load };
+  });
+  const teamLabels = ["Réception", "Mise en stock", "Préparation", "Expédition"];
+  const teamLoad = teamLabels.map((name, idx) => ({
+    name,
+    load: Math.max(20, Math.min(100, Math.round(avgScore * 0.5 + riskMoves.length * 2 + idx * 9 + (automation === "auto" ? -8 : automation === "hybrid" ? -2 : 6))))
+  }));
+
+  const incidents = riskMoves
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 6)
+    .map((m) => `${maskSku(m.sku)} · ${m.priority} · score ${m.score} · ${m.from} → ${m.targetType}/${m.toZone}`);
+
+  const automationActions = [
+    `Réallouer ${Math.min(8, Math.max(2, riskMoves.length))} tâches vers zone ${riskMoves[0]?.toZone || "L3"}`,
+    `Déclencher cycle de consolidation ${automation === "auto" ? "automatique" : "supervisé"}`,
+    `Renforcer le créneau ${teamLoad.sort((a, b) => b.load - a.load)[0].name} (+${Math.round(avgScore / 12)}%)`,
+    `Programmer une revue capacité sur horizon ${horizon} jours`
+  ];
+
+  return {
+    at: new Date().toLocaleString("fr-CA"),
+    horizon,
+    riskThreshold,
+    automation,
+    avgScore,
+    avgConfidence,
+    riskCount: riskMoves.length,
+    forecast,
+    teamLoad,
+    incidents,
+    automationActions,
+    stability: Math.max(0, 100 - Math.round((riskMoves.length / Math.max(1, moves.length)) * 100)),
+    saturation: Math.min(100, Math.round(forecast.reduce((sum, w) => sum + w.load, 0) / forecast.length))
+  };
+}
+
+function renderPilotage(snapshot) {
+  if (!snapshot) return;
+  el("pilotageMeta").textContent = `Pilotage ${snapshot.at} · horizon ${snapshot.horizon}j · seuil risque ${snapshot.riskThreshold} · mode ${snapshot.automation}`;
+  el("pilotageKpis").innerHTML = [
+    ["Indice de stabilité", `${snapshot.stability}%`],
+    ["Saturation projetée", `${snapshot.saturation}%`],
+    ["Incidents critiques", snapshot.riskCount],
+    ["Confiance pilotage", `${snapshot.avgConfidence}%`],
+    ["Score moyen impact", snapshot.avgScore],
+    ["Actions auto", snapshot.automationActions.length]
+  ]
+    .map(([label, value]) => `<div class="stat-card"><span>${label}</span><b>${value}</b></div>`)
+    .join("");
+
+  el("capacityForecast").innerHTML = snapshot.forecast
+    .map((w) => `<div class="mini-bar"><span>S${w.week}</span><div><i style="width:${w.load}%"></i></div><b>${w.load}%</b></div>`)
+    .join("");
+
+  el("teamLoad").innerHTML = snapshot.teamLoad
+    .map((t) => `<div class="mini-bar"><span>${t.name}</span><div><i style="width:${t.load}%"></i></div><b>${t.load}%</b></div>`)
+    .join("");
+
+  el("incidentQueue").innerHTML = snapshot.incidents.length
+    ? snapshot.incidents.map((i) => `<li>${i}</li>`).join("")
+    : "<li>Aucun incident au-dessus du seuil</li>";
+  el("automationActions").innerHTML = snapshot.automationActions.map((a) => `<li>${a}</li>`).join("");
 }
 
 function renderActivity() {
@@ -397,6 +505,7 @@ function renderImprovements() {
   el("uiImprovementsList").innerHTML = improvements.ui.map((i) => `<li>${i}</li>`).join("");
   el("aiImprovementsList").innerHTML = improvements.ai.map((i) => `<li>${i}</li>`).join("");
   el("appImprovementsList").innerHTML = improvements.app.map((i) => `<li>${i}</li>`).join("");
+  el("pilotageImprovementsList").innerHTML = improvements.pilotage.map((i) => `<li>${i}</li>`).join("");
 }
 
 function refreshDatasetStatus() {
@@ -532,6 +641,16 @@ function bindEvents() {
   ["searchSkuInput", "zoneFilterSelect", "priorityFilterSelect", "sortMovesSelect"].forEach((id) =>
     el(id).addEventListener(id.includes("input") ? "input" : "change", () => renderReport(state.report))
   );
+  ["pilotageHorizon", "pilotageRiskThreshold", "pilotageAutomationMode"].forEach((id) =>
+    el(id).addEventListener(id.includes("Mode") ? "change" : "input", () => renderPilotage(buildPilotageSnapshot(state.currentMoves)))
+  );
+  el("pilotageRefreshBtn").addEventListener("click", () => renderPilotage(buildPilotageSnapshot(state.currentMoves)));
+  el("pilotageExportBtn").addEventListener("click", () => {
+    const snapshot = buildPilotageSnapshot(state.currentMoves);
+    downloadBlob(JSON.stringify(snapshot, null, 2), "pilotage-snapshot.json", "application/json");
+    toast("Instantané pilotage exporté");
+    logActivity("Export instantané pilotage");
+  });
 
   ["salesMultiplier", "incomingMultiplier", "capacityBias"].forEach((id) => el(id).addEventListener("input", () => {
     el("simValues").textContent = `Ventes x${el("salesMultiplier").value} | Arrivages x${el("incomingMultiplier").value} | Capacité x${el("capacityBias").value}`;
