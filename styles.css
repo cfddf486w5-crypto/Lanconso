@@ -4,6 +4,18 @@
   --primary: #1f5eff;
   --secondary: #00a3b4;
   --text: #19304f;
+  --border: #d4e1ff;
+  --muted: #5b6f8f;
+}
+
+body.dark {
+  --bg: #071224;
+  --card: #101f36;
+  --primary: #4f9bff;
+  --secondary: #1ed3b8;
+  --text: #e4efff;
+  --border: #2d4368;
+  --muted: #9db6dd;
 }
 
 * { box-sizing: border-box; }
@@ -12,6 +24,9 @@ body {
   font-family: "Inter", "Segoe UI", sans-serif;
   color: var(--text);
   background: linear-gradient(130deg, #f4f8ff 20%, #d8e7ff 100%);
+}
+body.dark {
+  background: linear-gradient(130deg, #071224 20%, #0c1d38 100%);
 }
 
 .app-shell {
@@ -28,6 +43,13 @@ body {
   flex-wrap: wrap;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 h1 { margin: 0; }
 .subtitle { margin: 4px 0 0; opacity: 0.8; }
 
@@ -37,13 +59,23 @@ h1 { margin: 0; }
   padding: 16px;
   box-shadow: 0 8px 20px rgba(26, 58, 112, 0.1);
   margin-top: 16px;
+  border: 1px solid var(--border);
 }
 
-.gate input, button, textarea {
+.gate input, button, textarea, select {
   border-radius: 10px;
   border: 1px solid #c8d6f3;
   padding: 10px;
   font-size: 0.95rem;
+}
+
+body.dark .gate input,
+body.dark button,
+body.dark textarea,
+body.dark select {
+  border-color: #2d4368;
+  color: var(--text);
+  background: #0f2746;
 }
 
 button {
@@ -53,14 +85,32 @@ button {
   cursor: pointer;
 }
 
-.row, .actions {
+button:hover { filter: brightness(1.08); }
+
+.outline-btn {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.danger-btn {
+  background: linear-gradient(120deg, #de3248, #a91539);
+}
+
+.row, .actions, .filters-row {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 8px;
 }
 
+.filters-row > * {
+  flex: 1;
+  min-width: 170px;
+}
+
 .hidden { display: none; }
+.muted { color: var(--muted); }
 
 .tabs {
   margin-top: 16px;
@@ -87,6 +137,29 @@ button {
   gap: 14px;
 }
 
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stat-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px;
+  background: rgba(210, 227, 255, 0.26);
+}
+
+.stat-card span {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.stat-card b {
+  font-size: 1.2rem;
+}
+
 .upload-list {
   display: grid;
   gap: 8px;
@@ -94,8 +167,8 @@ button {
 
 .output {
   margin-top: 10px;
-  background: #f5f9ff;
-  border: 1px solid #d4e1ff;
+  background: rgba(210, 227, 255, 0.24);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 12px;
   max-height: 360px;
@@ -103,11 +176,18 @@ button {
 }
 
 .archive-item {
-  border: 1px solid #d7e2ff;
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 10px;
   margin-bottom: 10px;
-  background: #f8fbff;
+  background: rgba(210, 227, 255, 0.16);
+}
+
+.space-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .badge {
@@ -115,10 +195,19 @@ button {
   padding: 4px 8px;
   border-radius: 999px;
   background: #e4efff;
+  color: #20406d;
   font-size: 0.82rem;
   margin-right: 5px;
 }
 
-@media (max-width: 800px) {
-  .grid-2 { grid-template-columns: 1fr; }
+body.dark .badge {
+  background: #2a4268;
+  color: #cfe0ff;
+}
+
+@media (max-width: 900px) {
+  .grid-2,
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
 }
