@@ -46,168 +46,201 @@
         </nav>
 
         <section id="consolidation" class="tab-panel active">
-          <article class="card">
-            <div class="space-between">
-              <h2>Tableau de bord exécutif</h2>
-              <div class="chip" id="liveClock">--:--:--</div>
-            </div>
-            <div class="stats-grid">
-              <div class="stat-card"><span>SKU analysés</span><b id="statSku">0</b></div>
-              <div class="stat-card"><span>Déplacements</span><b id="statMoves">0</b></div>
-              <div class="stat-card"><span>Urgences capacité</span><b id="statCritical">0</b></div>
-              <div class="stat-card"><span>Confiance IA moyenne</span><b id="statConfidence">0%</b></div>
-              <div class="stat-card"><span>Temps d'analyse</span><b id="statDuration">0 ms</b></div>
-              <div class="stat-card"><span>Dernière analyse</span><b id="statLastRun">-</b></div>
+          <article class="card dropdown-panel">
+            <button class="panel-toggle" type="button">
+              <span>Tableau de bord exécutif</span>
+              <span class="panel-icon">▾</span>
+            </button>
+            <div class="panel-content">
+              <div class="space-between">
+                <h2>Tableau de bord exécutif</h2>
+                <div class="chip" id="liveClock">--:--:--</div>
+              </div>
+              <div class="stats-grid">
+                <div class="stat-card"><span>SKU analysés</span><b id="statSku">0</b></div>
+                <div class="stat-card"><span>Déplacements</span><b id="statMoves">0</b></div>
+                <div class="stat-card"><span>Urgences capacité</span><b id="statCritical">0</b></div>
+                <div class="stat-card"><span>Confiance IA moyenne</span><b id="statConfidence">0%</b></div>
+                <div class="stat-card"><span>Temps d'analyse</span><b id="statDuration">0 ms</b></div>
+                <div class="stat-card"><span>Dernière analyse</span><b id="statLastRun">-</b></div>
+              </div>
             </div>
           </article>
 
           <div class="grid-2">
-            <article class="card">
-              <h2>Imports Excel (.xlsx)</h2>
-              <div class="upload-list">
-                <label>Inventaire <input id="inventoryFile" type="file" accept=".xlsx,.xls" /></label>
-                <label>Ventes <input id="salesFile" type="file" accept=".xlsx,.xls" /></label>
-                <label>Marchandises attendues <input id="incomingFile" type="file" accept=".xlsx,.xls" /></label>
-                <label>Locations & types <input id="locationsFile" type="file" accept=".xlsx,.xls" /></label>
-              </div>
-              <div class="progress-wrap"><div id="datasetProgress" class="progress-bar"></div></div>
-              <p id="datasetStatus" class="muted"></p>
-              <div class="actions">
-                <button id="runAnalysisBtn">Lancer l'analyse IA</button>
-                <button id="loadDemoBtn" class="outline-btn">Charger données démo</button>
-                <button id="scenarioBtn" class="outline-btn">Scénario stress</button>
+            <article class="card dropdown-panel">
+              <button class="panel-toggle" type="button"><span>Page imports Excel (.xlsx)</span><span class="panel-icon">▾</span></button>
+              <div class="panel-content">
+                <h2>Imports Excel (.xlsx)</h2>
+                <div class="upload-list">
+                  <label>Inventaire <input id="inventoryFile" type="file" accept=".xlsx,.xls" /></label>
+                  <label>Ventes <input id="salesFile" type="file" accept=".xlsx,.xls" /></label>
+                  <label>Marchandises attendues <input id="incomingFile" type="file" accept=".xlsx,.xls" /></label>
+                  <label>Locations & types <input id="locationsFile" type="file" accept=".xlsx,.xls" /></label>
+                </div>
+                <div class="progress-wrap"><div id="datasetProgress" class="progress-bar"></div></div>
+                <p id="datasetStatus" class="muted"></p>
+                <div class="actions">
+                  <button id="runAnalysisBtn">Lancer l'analyse IA</button>
+                  <button id="loadDemoBtn" class="outline-btn">Charger données démo</button>
+                  <button id="scenarioBtn" class="outline-btn">Scénario stress</button>
+                </div>
               </div>
             </article>
 
-            <article class="card">
-              <h2>Paramètres simulation IA</h2>
-              <div class="field-grid">
-                <label>Multiplicateur ventes
-                  <input id="salesMultiplier" type="range" min="0.5" max="2" step="0.1" value="1" />
-                </label>
-                <label>Multiplicateur arrivages
-                  <input id="incomingMultiplier" type="range" min="0.5" max="2" step="0.1" value="1" />
-                </label>
-                <label>Sévérité capacité
-                  <input id="capacityBias" type="range" min="0.5" max="2" step="0.1" value="1" />
-                </label>
+            <article class="card dropdown-panel">
+              <button class="panel-toggle" type="button"><span>Page paramètres simulation IA</span><span class="panel-icon">▾</span></button>
+              <div class="panel-content">
+                <h2>Paramètres simulation IA</h2>
+                <div class="field-grid">
+                  <label>Multiplicateur ventes
+                    <input id="salesMultiplier" type="range" min="0.5" max="2" step="0.1" value="1" />
+                  </label>
+                  <label>Multiplicateur arrivages
+                    <input id="incomingMultiplier" type="range" min="0.5" max="2" step="0.1" value="1" />
+                  </label>
+                  <label>Sévérité capacité
+                    <input id="capacityBias" type="range" min="0.5" max="2" step="0.1" value="1" />
+                  </label>
+                </div>
+                <p id="simValues" class="muted"></p>
+                <h3>Règles métier actives</h3>
+                <ul id="rulesPreview"></ul>
               </div>
-              <p id="simValues" class="muted"></p>
-              <h3>Règles métier actives</h3>
-              <ul id="rulesPreview"></ul>
             </article>
           </div>
 
-          <article class="card">
-            <h2>Pilote des déplacements</h2>
-            <div class="actions wrap">
-              <button id="generateMovesBtn">Générer les déplacements</button>
-              <button id="exportCsvBtn" class="outline-btn">Exporter CSV</button>
-              <button id="exportJsonBtn" class="outline-btn">Exporter JSON</button>
-              <button id="printReportBtn">Imprimer</button>
-              <button id="archiveReportBtn">Archiver</button>
+          <article class="card dropdown-panel">
+            <button class="panel-toggle" type="button"><span>Page pilote des déplacements</span><span class="panel-icon">▾</span></button>
+            <div class="panel-content">
+              <h2>Pilote des déplacements</h2>
+              <div class="actions wrap">
+                <button id="generateMovesBtn">Générer les déplacements</button>
+                <button id="exportCsvBtn" class="outline-btn">Exporter CSV</button>
+                <button id="exportJsonBtn" class="outline-btn">Exporter JSON</button>
+                <button id="printReportBtn">Imprimer</button>
+                <button id="archiveReportBtn">Archiver</button>
+              </div>
+              <div class="filters-row">
+                <input id="searchSkuInput" placeholder="Rechercher SKU..." />
+                <select id="zoneFilterSelect">
+                  <option value="all">Toutes les zones</option>
+                  <option value="L2">L2</option>
+                  <option value="L3">L3</option>
+                  <option value="L5">L5</option>
+                </select>
+                <select id="priorityFilterSelect">
+                  <option value="all">Toutes priorités</option>
+                  <option value="Critique">Critique</option>
+                  <option value="Haute">Haute</option>
+                  <option value="Moyenne">Moyenne</option>
+                  <option value="Standard">Standard</option>
+                </select>
+                <select id="sortMovesSelect">
+                  <option value="priority">Tri: priorité IA</option>
+                  <option value="sku">Tri: SKU A→Z</option>
+                  <option value="zone">Tri: zone</option>
+                  <option value="score">Tri: score impact</option>
+                </select>
+              </div>
+              <div id="analysisOutput" class="output"></div>
+              <div id="movementOutput" class="output"></div>
             </div>
-            <div class="filters-row">
-              <input id="searchSkuInput" placeholder="Rechercher SKU..." />
-              <select id="zoneFilterSelect">
-                <option value="all">Toutes les zones</option>
-                <option value="L2">L2</option>
-                <option value="L3">L3</option>
-                <option value="L5">L5</option>
-              </select>
-              <select id="priorityFilterSelect">
-                <option value="all">Toutes priorités</option>
-                <option value="Critique">Critique</option>
-                <option value="Haute">Haute</option>
-                <option value="Moyenne">Moyenne</option>
-                <option value="Standard">Standard</option>
-              </select>
-              <select id="sortMovesSelect">
-                <option value="priority">Tri: priorité IA</option>
-                <option value="sku">Tri: SKU A→Z</option>
-                <option value="zone">Tri: zone</option>
-                <option value="score">Tri: score impact</option>
-              </select>
-            </div>
-            <div id="analysisOutput" class="output"></div>
-            <div id="movementOutput" class="output"></div>
           </article>
         </section>
 
         <section id="pilotage" class="tab-panel">
-          <article class="card">
-            <h2>Centre opérationnel IA</h2>
-            <div id="riskHeatmap" class="heatmap"></div>
-            <div id="zoneSummary" class="stats-grid"></div>
+          <article class="card dropdown-panel">
+            <button class="panel-toggle" type="button"><span>Page centre opérationnel IA</span><span class="panel-icon">▾</span></button>
+            <div class="panel-content">
+              <h2>Centre opérationnel IA</h2>
+              <div id="riskHeatmap" class="heatmap"></div>
+              <div id="zoneSummary" class="stats-grid"></div>
+            </div>
           </article>
-          <article class="card">
-            <h2>Journal d'activité applicatif</h2>
-            <div id="activityLog" class="output"></div>
+          <article class="card dropdown-panel">
+            <button class="panel-toggle" type="button"><span>Page journal d'activité applicatif</span><span class="panel-icon">▾</span></button>
+            <div class="panel-content">
+              <h2>Journal d'activité applicatif</h2>
+              <div id="activityLog" class="output"></div>
+            </div>
           </article>
-          <article class="card">
-            <h2>Diagnostic système</h2>
-            <div id="diagnosticsOutput" class="output"></div>
+          <article class="card dropdown-panel">
+            <button class="panel-toggle" type="button"><span>Page diagnostic système</span><span class="panel-icon">▾</span></button>
+            <div class="panel-content">
+              <h2>Diagnostic système</h2>
+              <div id="diagnosticsOutput" class="output"></div>
+            </div>
           </article>
         </section>
 
         <section id="settings" class="tab-panel">
-          <article class="card">
-            <h2>Paramètres IA et accessibilité</h2>
-            <textarea id="customRules" rows="8"></textarea>
-            <div class="field-grid">
-              <label><input type="checkbox" id="highContrastToggle" /> Contraste élevé</label>
-              <label><input type="checkbox" id="reduceMotionToggle" /> Réduire les animations</label>
-              <label><input type="checkbox" id="secureModeToggle" /> Mode sécurisé (masquer SKU)</label>
-              <label>Taille police <input id="fontScaleRange" type="range" min="90" max="125" step="5" value="100" /></label>
-            </div>
-            <div class="actions">
-              <button id="saveRulesBtn">Enregistrer les règles</button>
-              <button id="resetRulesBtn" class="outline-btn">Réinitialiser</button>
-              <button id="resetAppBtn" class="danger-btn">Réinitialiser l'application</button>
+          <article class="card dropdown-panel">
+            <button class="panel-toggle" type="button"><span>Page paramètres IA et accessibilité</span><span class="panel-icon">▾</span></button>
+            <div class="panel-content">
+              <h2>Paramètres IA et accessibilité</h2>
+              <textarea id="customRules" rows="8"></textarea>
+              <div class="field-grid">
+                <label><input type="checkbox" id="highContrastToggle" /> Contraste élevé</label>
+                <label><input type="checkbox" id="reduceMotionToggle" /> Réduire les animations</label>
+                <label><input type="checkbox" id="secureModeToggle" /> Mode sécurisé (masquer SKU)</label>
+                <label>Taille police <input id="fontScaleRange" type="range" min="90" max="125" step="5" value="100" /></label>
+              </div>
+              <div class="actions">
+                <button id="saveRulesBtn">Enregistrer les règles</button>
+                <button id="resetRulesBtn" class="outline-btn">Réinitialiser</button>
+                <button id="resetAppBtn" class="danger-btn">Réinitialiser l'application</button>
+              </div>
             </div>
           </article>
         </section>
 
         <section id="archives" class="tab-panel">
-          <article class="card">
-            <div class="space-between">
-              <h2>Archives IA</h2>
-              <div class="actions">
-                <button id="clearArchivesBtn" class="danger-btn">Vider toutes les archives</button>
-                <button id="importBackupBtn" class="outline-btn">Importer sauvegarde</button>
-                <button id="exportBackupBtn" class="outline-btn">Exporter sauvegarde</button>
+          <article class="card dropdown-panel">
+            <button class="panel-toggle" type="button"><span>Page archives IA et comparaison</span><span class="panel-icon">▾</span></button>
+            <div class="panel-content">
+              <div class="space-between">
+                <h2>Archives IA</h2>
+                <div class="actions">
+                  <button id="clearArchivesBtn" class="danger-btn">Vider toutes les archives</button>
+                  <button id="importBackupBtn" class="outline-btn">Importer sauvegarde</button>
+                  <button id="exportBackupBtn" class="outline-btn">Exporter sauvegarde</button>
+                </div>
               </div>
+              <div class="filters-row">
+                <input id="archiveSearchInput" placeholder="Rechercher dans les archives..." />
+                <select id="archiveFilterSelect">
+                  <option value="all">Tous les rapports</option>
+                  <option value="critical">Avec critiques</option>
+                  <option value="light">Sans critique</option>
+                </select>
+                <select id="compareArchiveSelect"></select>
+              </div>
+              <div id="archiveList" class="archive-list"></div>
+              <div id="compareOutput" class="output"></div>
             </div>
-            <div class="filters-row">
-              <input id="archiveSearchInput" placeholder="Rechercher dans les archives..." />
-              <select id="archiveFilterSelect">
-                <option value="all">Tous les rapports</option>
-                <option value="critical">Avec critiques</option>
-                <option value="light">Sans critique</option>
-              </select>
-              <select id="compareArchiveSelect"></select>
-            </div>
-            <div id="archiveList" class="archive-list"></div>
-            <div id="compareOutput" class="output"></div>
           </article>
           <input id="backupInput" type="file" accept="application/json" class="hidden" />
         </section>
 
         <section id="improvements" class="tab-panel">
-          <article class="card">
-            <h2>Registre des 90 améliorations majeures implantées</h2>
-            <div class="grid-3">
-              <div>
-                <h3>30 UI/UX</h3>
-                <ol id="uiImprovementsList"></ol>
-              </div>
-              <div>
-                <h3>30 IA Métier</h3>
-                <ol id="aiImprovementsList"></ol>
-              </div>
-              <div>
-                <h3>30 Application globale</h3>
-                <ol id="appImprovementsList"></ol>
+          <article class="card dropdown-panel">
+            <button class="panel-toggle" type="button"><span>Page registre des 90 améliorations</span><span class="panel-icon">▾</span></button>
+            <div class="panel-content">
+              <h2>Registre des 90 améliorations majeures implantées</h2>
+              <div class="grid-3">
+                <div>
+                  <h3>30 UI/UX</h3>
+                  <ol id="uiImprovementsList"></ol>
+                </div>
+                <div>
+                  <h3>30 IA Métier</h3>
+                  <ol id="aiImprovementsList"></ol>
+                </div>
+                <div>
+                  <h3>30 Application globale</h3>
+                  <ol id="appImprovementsList"></ol>
+                </div>
               </div>
             </div>
           </article>

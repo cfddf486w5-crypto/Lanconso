@@ -53,6 +53,23 @@ body.dark {
 }
 
 body.compact .card { padding: 12px; }
+
+.dropdown-panel { padding-top: 12px; }
+.panel-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(15, 25, 44, 0.75);
+  color: #bfe9ff;
+  border: 1px solid rgba(140, 205, 255, 0.55);
+  box-shadow: none;
+  text-align: left;
+}
+.panel-toggle .panel-icon { transition: transform 0.2s ease; }
+.panel-content { display: none; margin-top: 12px; }
+.dropdown-panel.open .panel-content { display: block; }
+.dropdown-panel.open .panel-toggle .panel-icon { transform: rotate(180deg); }
 body.high-contrast { filter: contrast(1.2); }
 body.reduce-motion * { transition: none !important; animation: none !important; }
 
