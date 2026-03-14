@@ -219,3 +219,59 @@ thead tr { background: rgba(71, 197, 255, 0.1); }
   .app-shell { padding: 12px; }
   .filters-row { grid-template-columns: 1fr; }
 }
+
+.pilotage-controls {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  align-items: end;
+}
+
+.pilotage-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--muted);
+}
+
+.mini-bars {
+  display: grid;
+  gap: 8px;
+}
+
+.mini-bar {
+  display: grid;
+  grid-template-columns: 96px 1fr 42px;
+  align-items: center;
+  gap: 8px;
+}
+
+.mini-bar div {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(96, 162, 255, 0.15);
+  overflow: hidden;
+}
+
+.mini-bar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--ok), var(--primary), var(--accent));
+}
+
+.clean-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+}
+
+.improvement-checklist {
+  margin: 0;
+  padding-left: 18px;
+  columns: 2;
+  column-gap: 20px;
+}
+
+.improvement-checklist li {
+  break-inside: avoid;
+  margin-bottom: 8px;
+}

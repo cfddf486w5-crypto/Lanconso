@@ -154,8 +154,49 @@
             <button class="panel-toggle" type="button"><span>Page centre opérationnel IA</span><span class="panel-icon">▾</span></button>
             <div class="panel-content">
               <h2>Centre opérationnel IA</h2>
+              <div class="filters-row pilotage-controls">
+                <label>Horizon (jours)
+                  <input id="pilotageHorizon" type="range" min="7" max="45" step="1" value="21" />
+                </label>
+                <label>Seuil risque
+                  <input id="pilotageRiskThreshold" type="range" min="30" max="90" step="5" value="60" />
+                </label>
+                <label>Mode automatisation
+                  <select id="pilotageAutomationMode">
+                    <option value="assist">Assisté</option>
+                    <option value="hybrid">Hybride</option>
+                    <option value="auto">Autonome</option>
+                  </select>
+                </label>
+                <button id="pilotageRefreshBtn" class="outline-btn">Actualiser le pilotage</button>
+              </div>
+              <p id="pilotageMeta" class="muted"></p>
+              <div id="pilotageKpis" class="stats-grid"></div>
               <div id="riskHeatmap" class="heatmap"></div>
               <div id="zoneSummary" class="stats-grid"></div>
+              <div class="grid-2">
+                <div class="output">
+                  <h3>Prévision capacité hebdomadaire</h3>
+                  <div id="capacityForecast" class="mini-bars"></div>
+                </div>
+                <div class="output">
+                  <h3>Charge équipes</h3>
+                  <div id="teamLoad" class="mini-bars"></div>
+                </div>
+              </div>
+              <div class="grid-2">
+                <div class="output">
+                  <h3>File d'incidents critiques</h3>
+                  <ul id="incidentQueue" class="clean-list"></ul>
+                </div>
+                <div class="output">
+                  <h3>Actions automatisées recommandées</h3>
+                  <ul id="automationActions" class="clean-list"></ul>
+                </div>
+              </div>
+              <div class="actions">
+                <button id="pilotageExportBtn">Exporter instantané pilotage</button>
+              </div>
             </div>
           </article>
           <article class="card dropdown-panel">
@@ -170,6 +211,13 @@
             <div class="panel-content">
               <h2>Diagnostic système</h2>
               <div id="diagnosticsOutput" class="output"></div>
+            </div>
+          </article>
+          <article class="card dropdown-panel">
+            <button class="panel-toggle" type="button"><span>30 améliorations majeures du pilotage avancé</span><span class="panel-icon">▾</span></button>
+            <div class="panel-content">
+              <h2>Feuille de route implantée</h2>
+              <ol id="pilotageImprovementsList" class="improvement-checklist"></ol>
             </div>
           </article>
         </section>
