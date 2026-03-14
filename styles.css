@@ -275,3 +275,5 @@ thead tr { background: rgba(71, 197, 255, 0.1); }
   break-inside: avoid;
   margin-bottom: 8px;
 }
+
+.output pre { margin: 0; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; line-height: 1.45; }
